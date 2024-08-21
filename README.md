@@ -270,3 +270,11 @@ Coroutine에서 Data Stream을 지원하기 위해서는 Flow를 사용해야 �
             }
         }
         ```
+    + #### Emit, Edit 차이
+        + ##### Edit
+            **DataStore의 값을 수정, 저장할 떄 사용**하는 것
+            
+        + ##### Emit
+            **Flow에서 새로운 값 방출할 때 사용**하는 것
+
+
