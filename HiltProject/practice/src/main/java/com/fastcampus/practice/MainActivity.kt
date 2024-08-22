@@ -19,7 +19,6 @@ import javax.inject.Inject
 // Component에 대해서 진입점을 설정해주지 않으면 super.onCreate() 이후에 의존성을 호출해도 not initialize됨
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject
     lateinit var myName: MyName
 
