@@ -246,6 +246,7 @@ Coroutine에서 Data Stream을 지원하기 위해서는 Flow를 사용해야 �
         + Flow의 catch 연산자를 통해 에러를 적절히 처리할 수 있음
         + 모든 작업이 하나의 Transaction 내에서 Atomic하게 발생하기 때문에 안전함
         + Proto Datastore 사용 시, type safe한 장점이 있어 RunTime Error 가능성 줄일 수 있음
+        + 대용량의 데이터와 복잡한 데이터 구조를 보아 효율적으로 관리할 수 있음
 
     + #### 코드 예시
         ```kotlin
@@ -278,3 +279,200 @@ Coroutine에서 Data Stream을 지원하기 위해서는 Flow를 사용해야 �
             **Flow에서 새로운 값 방출할 때 사용**하는 것
 
 
+## Hilt
+Android를 위한 표준적인 DI 솔루션을 제공
+
+보일러플레이트 감소
+
+Jetpack과 통함
+
+테스트 도구 제공
+
+마이그레이션 API 제공
+
++ ### 등장 배경
+    기존 Android 언어는 JAVA였기 때문에 의존성 주입 또한 JAVA 방식을 따랐음
+    
+    (JSR 330, JAVA의 의존성 입을 위한 표준 방법을 정의한 내용)
+
+    1. Guice
+        + 자바를 위한 의존성 주입
+        + Runtime에 의존성 주입
+        + Reflection 기반
+
+            RunTime에 Load된 다른 클래스 정보들을 가져올 수 있는 장점이 있지만, 비용이 큼 
+            
+            => Performance가 떨어지게 됨
+    2. Dagger2
+        + 자바를 위한 의존성 주입
+        + 컴파일 타임 코드 생성
+        + Square에서 최초 개발, 이후 구글에서 유지 보수
+        + Reflection을 사용하지 않음
+    3. Koin
+        + Kotlin을 위한 의존성 주입
+        + Reflection 사용
+        + Serivce Locator Pattern
+    4. Hilt
+        + 2020년 6월 최초 출시
+        + Android만을 위한 Solution
+        + Dagger2 기반
+        + 표준 컴포넌트 제공
+
+
++ ### Koin, Dagger2 비교
+
+    |분류| Koin|Dagger1(Hilt)|
+    |:---:|:---:|:---:|
+    |**Runtime 안정성**|낮음|높음|
+    |**Performance**|떨어짐|높음|
+    |**의존성 관리 난이도**|어려움|쉬움|
+
+    Koin은 의존성 체크를 Runtime에 실시 => Runtime에 Crash가 발생할 수도 있음
+
+    Koin은 Reflection을 사용하기 때문에 Performance가 떨어짐
+
+    Koin은 시간의 흐름에 따라 커졌을 때 의존성 그래프를 파악하기 어려움
+
++ ### Dagger2에 대해서
+    + Annotation Processor로 자동 코드 생성
+
+        Compile 타임에 오류를 Check 할 수 있고, Reflection을 사용할 필요 X
+    + Running Curve가 높음
+
+    + 높은 자유도
+
+        => 동일한 문제를 해결할 때 개발자마다 서로 다른 방식으로 해결할 수가 있음
+
+        => 혼란을 야기시킴
+
+## Hilt 적용하기
+
++ ### @HiltAndroidApp
+
+    Application class에 마킹해야 함
+
+
+
+
+
++ ### Binding (코드 X 개념 O)
+
+    컴포넌트에 의존성을 추가하는 것
+
+
+
+
++ ### @AndroidEntryPoint
+    Activity등 Android Component등에 마킹함
+
+    마킹하면 ActvityRetainedComponent가 생성됨
+
++ ### @Inject
+    두가지의 의미를 가짐
+
+    변수 위에 선언할 때는 의존성 주입을 요청한다는 의미
+
+    생성자 앞에 선언할 때는 해당 클래스의 의존성을 Component에 Binding 하겠다라는, 의존성을 추가하겠다라는 의미
+
++ ### 생성자를 통한 의존성 Binding 방법
+    ```kotlin
+    class App : Application(){
+        
+        // MyName 형식의 의존성을 주입해줄 것을 요청
+        @Inject
+        lateinit var myName: MyName
+
+        override fun onCreate(){
+            // super.onCreate()에서 의존성 주입이 이루어지므로, 그 이전에 의존성을 불러오려고 하면 error가 남
+            super.onCreate()
+            Log.e(TAG, "My name is $myName")
+        }
+    }
+
+    // MyName이라는 의존성을 추가하겠다는 의미로 constructor 앞에 @Inject 추가
+    class MyName @Inject constructor(){
+        override fun toString(): String{
+            return "예시"
+        }
+    }
+    ```
+
++ ### Module을 통한 Binding 방법
+    ```kotlin
+    class App : Application(){
+        
+        // MyName 형식의 의존성을 주입해줄 것을 요청
+        @Inject
+        lateinit var myName: MyName
+
+        override fun onCreate(){
+            // super.onCreate()에서 의존성 주입이 이루어지므로, 그 이전에 의존성을 불러오려고 하면 error가 남
+            // 꼭 이것뿐 아니라 Activity 등 Component에서 진입점(EntryPoint)를 설정하지 않아도 error가 남
+            super.onCreate()
+            Log.e(TAG, "My name is $myName")
+        }
+    }
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object AppModule{
+
+        @Provides
+        funj provideMyName():MyName{
+            return MyName()
+        }
+    }
+
+    // MyName이라는 의존성을 추가하겠다는 의미로 constructor 앞에 @Inject 추가
+    class MyName {
+        override fun toString(): String{
+            return "예시"
+        }
+    }
+    ```
+
+> **super.onCreate()에서 의존성 주입이 이루어지므로, 그 이전에 의존성을 불러오려고 하면 error가 남**
+
+> **또한 Component에 대해서 진입점을 설정해주지 않으면, super.onCreate() 이후에 변수를 호출을 해도 not initialize error 발생**
+
++ ### Annotation
+    + #### Hilt Annotation 종류
+        + ##### @HiltAndroidApp
+        + ##### @AndroidEntryPoint
+        + ##### @Module
+        + ##### @InstallIn
+        + ##### @HiltViewModel
+    
+    + #### Annotation Processor
+        컴파일 타임에 어노테이션을 스캔하고, 소스 코드를 검사 또는 생성함
+
+        Round : 어노테이션을 처리하는 과정
+
+        소스 내의 모든 어노테이션이 처리될 때까지 몇차례의 라운드를 거치면서 어노테이션 프로세서가 코드를 스캔하고 처리함
+
+    + #### Hilt Annotation 처리 요약
+        + ##### Hild Annotatino을 사용하여 부가 정보를 제공
+        + ##### Compile Time에 의존성 그래프에 이상이 없는지 확인
+        + ##### 생성된 소스코드를 기반으로 동작하므로 Reflection을 사용하지 않아도 됨
+
++ ### Byte 코드 변조
+    + #### Byte코드란?
+        자바 소스코드가 컴파일을 거쳐 나온 결과물
+
+    + #### Transform API
+        AGP(Android Gradle Plugin)에 포함된 API
+
+        중간 빌드 산출물들을 처리
+        
+        바이트 코드 변환을 위한 Gradle Task 생성
+
+        AGP는 변조된 내용들 사이의 의존성을 Handling
+
+    + #### Byte 코드 변조 이유
+        Hilt 사용 시 필수는 아님
+
+        소스 코드를 해치지 않으면서 Hilt를 사용할 때 편리하게 의존성 주입을 할 수 있도록 도와줌
+
+        Hilt를 사용할 때 의존성 주입을 위해서 Hilt_~를 반드시 참조 해야 함
+
+        => 이를 Annotation을 통해서 compile 과정 중에 변환 시켜줌
