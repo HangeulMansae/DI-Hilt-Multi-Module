@@ -476,3 +476,120 @@ Jetpack과 통함
         Hilt를 사용할 때 의존성 주입을 위해서 Hilt_~를 반드시 참조 해야 함
 
         => 이를 Annotation을 통해서 compile 과정 중에 변환 시켜줌
+
+
+## 모듈이란
+프로그램을 구성하는 구성요소
+
+관련된 데이터와 함수를 하나로 묶은 단위
+
+## Binding 주입 방법
+Module Component에 Provides Annotation 사용
+
+생성자에 Inject Annotation으로 Binding
+
+## Inject
+
++ ### 사용 방법
+    + #### 생성자 주입
+        생성자 주입으로 의존성 주입을 받을 때 Parameter의 의존성도 주입 받지만, **주입 받는 대상도 Hilt Component에 Binding이 됨**
+        ```kotlin
+        // Bar라는 의존성을 Hilt Component에 요청하고 Runtime에 주입받음
+        // 생성자의 Parameter로 주입받았기 때문에, Foo라는 객체를 Instance화 할 때부터 참조할 수 있는게 특징
+        class Foo @Inject construct(bar: Bar){
+
+        }
+        ```
+    + #### 필드 주입
+        일반적으로 Android 클래스에서는 생성자 주입을 할 수가 없기 때문에, 필드 주입을 많이 활용
+
+        필드 주입이나 메서드 주입의 경우에는 **@AndroidEntryPoint**라는 Annotation이 필수
+
+
+        ```kotlin
+        @AndroidEntryPoint
+        class AndroidClass : {
+            // 필드 주입의 경우 필드 위에 @Inject Annotation을 마킹하면 됨
+            @Inject
+            lateinit var bar:Bar
+        }
+        ```
+    + #### 메서드 주입
+        잘 활용되는 방식은 아님
+
+        **필드 주입이 메서드 주입보다 먼저 수행됨**
+        ```kotlin
+        @AndroidEntryPoint
+        class AndroidClass: {
+            // 메서드 주입도 메서드 위에 @Inject Annotation을 마킹함
+            @Inject
+            fun setBar(bar: Bar){
+                // ...
+            }
+        }
+        ```
+
+
+## 중복 Binding
+Hilt는 기본적으로 package name을 포함한 type으로 의존성을 구분함
+
+그런데 같은 의존성이 여러번 Component에 Binding 되었을 경우 Component 입장에서는 어떤 것을 Client(의존성을 요청하는 대상)에게 전달해야 할 지 애매모호해지므로 오류가 발생함
+
+
++ ### Qualifier
+    간혹 의도적으로 중복 Binding을 쓰고 싶을 수 있음
+
+
+    직접적으로 쓰는 것이 아님
+
+    @Qualifier를 Annotation으로 갖는 새로운 Annotation을 정의해야 함
+
+    ```kotlin
+    // 새로운 Qualifier 정의
+    @Qualifier
+    annotation class CustomQualifier
+
+    ------다른 영역-------
+
+    @InsatallIn(SingletonComponent::class)
+    object AppModule {
+
+        // 새로운 Qualifier를 Binding하고자 하는 영역에 갖다 붙이면 됨
+        @CustomQualifier
+        @Provides
+        fun provideFoo1(): Foo{
+            return Foo()
+        }
+
+        @Provides
+        fun provideFoo2(): Foo{
+            return Foo()
+        }
+    }
+
+    ------다른 영역------
+
+
+    @AndroidEntryPoint
+    class MainActivity: ComponentActivity(){
+        
+        // 의존성을 요청할 때도 Qualifer에 해당하는 의존성을 주입받고 싶다면, annotation을 붙혀서 요청하면 됨
+        // 만약 @CustomQualifier를 붙이지 않는다면 @CustomQualifier 없이 선언한 provideFoo2 방식으로 의존성이 주입될 것
+        @CustomQualifier
+        @Inject
+        lateinit var foo: Foo
+    }
+    ```
++ ### Named
+   ```kotlin
+   @InstallIn(SingletonComponent::class)
+   object AppModule{
+    // 문자열을 Unique한 Key값으로 갖는 Named Annotation을 선언해서 Component가 구분
+    /// 만약 Client가 요청할 때 Name와 Key를 그대로 입력한다면 아래의 의존성으로 받을 수 있음
+    @Named("Foo1")
+    @Provides
+    fun provideFoo1(): Foo{
+        return Foo()
+    }
+   }
+   ``` 
