@@ -593,3 +593,127 @@ Hilt는 기본적으로 package name을 포함한 type으로 의존성을 구분
     }
    }
    ``` 
+## Android Component별 의존성 주입 시기
+|Component|Scope|Created at|Destroyed at|
+|:--:|:--:|:--:|:--:|
+|SingletonComponent|@Singleton|Application#onCreate()|Application Process is destroyed|
+|ActivityRetainedComponent|@ActivityRetainedScoped|Activity#onCreate()|Activity#onDestroy()|
+|ViewModelComponent|@ViewModelScoped|ViewModel created|ViewModel destroyed|
+|ActivityComponent|@ActivityScoped|Activity#onCreate()|Activity#onDestroy()|
+|FragmentComponent|@FragmentScoped|Fragment#onAttach()|Fragment#onDestroy()|
+|ViewComponent|@ViewScoped|View#super()|View destroyed|
+|ViewWithFragmentComponent|@ViewScoped|View#super()|View destroyed|
+|ServiceComponent|@ServiceScoped|Service#onCreate()|Service#onDestroy()|
+## Lazy
+일반적인 주입과는 조금 다름
+
+늦은 Instance 생성, Lazy Instance 주입 자체는 Component별 정해진 시기에 주입이 됨 하지만 Lazy 내부의 Generic Type은 주입이 되지 않은 상태
+
+Generic Type을 가져오려면 Lazy의 get 메서드를 호출해야 함
+
+**Lazy를 통해 Instance화 되는 시점을 늦출 수 있음**
+**Lazy Instance는 매번 get() 호출에 동일한 Instance를 반환(같은 Lazy Instance에서의 호출에 대하여)**
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var fooLazy:Lazy<Foo>
+
+    override fun onCreate(savedInstanceState: Bundle?){
+        super.onCreate(savedInstanceState)
+
+        //get() 호출 시 Instance화
+        val foo1 = fooLazy.get()
+    }
+}
+```
+
++ ### Lazy 주입 특징
+    + Lazy<T>의 get() 메서드를 호출할 떄 T를 반환함, get() 호출 시점에 T가 Instance화 됨
+    + Lazy<T>의 get() 호출 이후 다시 get()을 호출하면 캐시 된 (동일한) T Insatnce를 얻음
+    + T 바인딩에 Scoped가 지정되어 있다면, 각 Lazy<T> 요청에 대한 동일한 Lazy<T> Instance가 주입됨
+    + **특정 시점에 바인딩 Instance화 할 때 사용하면 좋음**
+    + **Instance 생성에 비용이 큰 경우 사용하면 좋음**
+
+
+## Provider
+주입받고자 하는 대상 의존성을 Generic으로 갖는 Mapper Provider를 주입받는 방식
+
+**Provider는 매 get() 호출에 새로운 Instance를 반환**
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var fooProvider:Provider<Foo>
+
+    override fun onCreate(savedInstanceState: Bundle?){
+        super.onCreate(savedInstanceState)
+
+        //get() 호출 시 Instance화
+        val foo1 = fooProvider.get()
+    }
+}
+```
+
++ ### Provider 주입 특징
+
+    + Provider<T>의 get() 메서드를 호출할 떄마다 새로운 Instance T를 반환함
+    + T 바인딩에 Scope가 지정되어 있으면, Provider<T>의 get() 메서드를 호출할 동안 동일한 Instance T를 반환
+    + T 바인딩에 Scope가 지정되어 있다면, 각 Provider<T> 요청에 대한 동일한 Provider<T> Instance가 주입됨
+    + 하나의 Provider<T>로 여러 T Instance를 생성하기 원할 때 사용할 수 있음(Builder, Factory 패턴과 유사)
+
+
+## Binding
++ ### 종류
+    + @Inject를 활용한 생성자 바인딩
+        ```kotlin
+        class Foo @INject constructor()
+        ```
+    + @Provides를 활용한 바인딩
+        Module 클래스에서 Provides Annotatino과 함께 메서드를 선언할 수 있음
+
+        메서드의 ReturnType이 바인딩됨, **Null을 Return 하는 것을 허용하지 않음**
+        ```kotlin
+        @Module
+        @InstallIn(...)
+        object MyModule{
+            // Client가 Foo 의존성을 요청할 때 Foo를 Binding 시키는 코드
+            @Provides
+            fun provideFOo(...): Foo{
+                //...
+            }
+        }         
+        ```
+    + @Binds를 활용한 바인딩
+        바인딩 된 의존성 효율적으로 활용하는 방법
+
+        기존에 바인딩 된 의존성이 있다면 새로운 Provider 메소드를 만들지 않고 효율적으로 Binding 할 수 있는 방법
+
+
+        ```kotlin
+        interface Engine
+        
+        // Engine은 Binding 되지 않고 GasolineEngine만이 Binding됨
+        class GasolineEngine @Inject constructor(): Engine
+
+        => 만약 Client가 Engine 타입의 주입을 요청한다면 현재 Engine에 대해서 Binding된 것이 없으므로 Error가 발생함
+        => GasolineEngine을 Engine으로 제공하는 Provides 메소드를 선언할 수도 있지만 @Binds를 쓰는게 더 좋음
+        ```
+
+        @Binds => 추상 클래스, 추상 함수로 선언
+        ```kotlin
+        @Module
+        @InstallIn()
+        abstract class EngineModule{
+            @Binds
+            abstract fun bindEngine(
+                // Parameter로는 이미 바인딩 되었던 의존성을 명시해줌
+                engine:GasolineEngine
+                ): Engine
+        }
+        ```
+
+    + @BindsOptionalOf를 활용한 바인딩
+    + @BindsInstance를 활용한 바인딩
