@@ -667,11 +667,11 @@ class MainActivity : ComponentActivity() {
 
 ## Binding
 + ### 종류
-    + @Inject를 활용한 생성자 바인딩
+    + ####  @Inject를 활용한 생성자 바인딩
         ```kotlin
         class Foo @INject constructor()
         ```
-    + @Provides를 활용한 바인딩
+    + #### @Provides를 활용한 바인딩
         Module 클래스에서 Provides Annotatino과 함께 메서드를 선언할 수 있음
 
         메서드의 ReturnType이 바인딩됨, **Null을 Return 하는 것을 허용하지 않음**
@@ -686,7 +686,7 @@ class MainActivity : ComponentActivity() {
             }
         }         
         ```
-    + @Binds를 활용한 바인딩
+    + #### @Binds를 활용한 바인딩
         바인딩 된 의존성 효율적으로 활용하는 방법
 
         기존에 바인딩 된 의존성이 있다면 새로운 Provider 메소드를 만들지 않고 효율적으로 Binding 할 수 있는 방법
@@ -700,6 +700,7 @@ class MainActivity : ComponentActivity() {
 
         => 만약 Client가 Engine 타입의 주입을 요청한다면 현재 Engine에 대해서 Binding된 것이 없으므로 Error가 발생함
         => GasolineEngine을 Engine으로 제공하는 Provides 메소드를 선언할 수도 있지만 @Binds를 쓰는게 더 좋음
+
         ```
 
         @Binds => 추상 클래스, 추상 함수로 선언
@@ -714,6 +715,44 @@ class MainActivity : ComponentActivity() {
                 ): Engine
         }
         ```
+        + ##### 제약 조건
+            + **@Binds는 반드시 모듈 내의 abstract 메서드에 추가해야 함**
+            + @Binds 메서드는 반드시 파라미터 1개만을 가짐
+            + 파라미터 타입이 Return Type의 Sub Type 이어야 함
+            + Scope 및 Qualifier Annotation과 함께 사용할 수 있음
+        
+        + ##### Concrete 클래스와 Abstract 클래스
+            Concrete 클래스란 new로 Instance화 할 수 있는 Class
+
+            Abstract는 abstract 키워드가 붙은, new를 통한 Instance화를 할 수 없는 클래스
+        + ##### @Binds, @Provides와 함께 사용 시 주의해야 할 내용
+            **@Binds는 Abstract Class의 Abstract 메소드에만 추가할 수 있는 반면, Provides는 Provides 메소드에 접근하고 호출하기 위해서 반드기 객체가 있어야 함**
+
+            그렇기 때문에 반드시 Instance화 가능한 Concrete 클래스 내부에서 선언이 되어야 함 => Module 클래스가 Concrete 클래스여야 함
+
+            But @Binds를 쓰게 되면 Module 클래스가 abstract로 선언이 됨
+
+            그런 이유로 웬만하면 Binds와 Provides는 각각 독립된 Module에 존재하는 것이 좋음
+
+            **만약 같이 쓰는 것이 필요하다면 Provides의 경우 companion object에 넣어서 굳이 Instance화 하지 않아도 접근할 수 있도록 설정**
+
+            ```kotlin
+            @Module
+            @InstallIn(SingletonComponent::class)
+            abstract class MyModule{
+                companion object{
+                    @Provides
+                    fun provideFoo(): Foo{...}
+                }
+
+                @Binds
+                abstract fun bindsEngine(engine:GasolineEngine):Engine
+            }
+            ``` 
+
 
     + @BindsOptionalOf를 활용한 바인딩
+        바인딩 되어 있지 않을 가능성이 있는 의존성을 요청할 때 (= 옵셔널 바인딩)
+
+        
     + @BindsInstance를 활용한 바인딩

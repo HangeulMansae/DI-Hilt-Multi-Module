@@ -28,6 +28,8 @@ class MainActivity : ComponentActivity() {
 //    @Inject
 //    lateinit var bar: Bar
 
+    @Inject
+    lateinit var car: Car
 
     @Inject
     lateinit var providerFoo1: Provider<Foo>
@@ -48,7 +50,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        Log.e(TAG, "onCreate: 엔진타입 = ${car.engine}", )
 //        val foo1 = providerFoo1.get()
 //        val foo2 = providerFoo1.get()
 //        assert(foo1 !== foo2)
