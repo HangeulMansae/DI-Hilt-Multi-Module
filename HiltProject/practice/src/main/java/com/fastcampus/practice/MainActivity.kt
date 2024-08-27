@@ -31,6 +31,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var car: Car
+
+    @Inject
+    lateinit var str: Set<String>
 // Provider 방식
 //    @Inject
 //    lateinit var providerFoo1: Provider<Foo>
@@ -54,6 +57,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        Log.e(TAG, "onCreate: $str", )
         Log.e(TAG, "onCreate: 엔진타입 = ${car.engine}", )
         assert(optionalFoo != null)
         Log.e(TAG, "onCreate: isPresent = ${optionalFoo.isPresent}", )

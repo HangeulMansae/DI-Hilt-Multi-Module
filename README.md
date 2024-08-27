@@ -866,3 +866,56 @@ Hilt가 지원하는 Multi Binding의 Collection Type은 Set, Map 두가지
         }
         ```
     + #### @ElementsIntoSet을 추가해서 사용
+        ```kotlin
+        @Module
+        @installIn(SingletonComponent::class)
+        class MyModuleB{
+
+            @Provides
+            @ElementsIntoSet
+            fun provideSomeStrings(): Set<String> {
+                // 이런 식으로 한꺼번에 전달 
+                // 위의 코드와 합쳐져서, Set<String>에는 "ABC", "DEF", "GHI"가 있음
+                return listOf("DEF", "GHI").toSet()
+            }
+        }
+        ```
+
+        멀티 바인딩 된 Set 주입
+
+        ```kotlin
+        class Bar @Inject constructor(
+            val strings: Set<String>
+        ){
+            init{
+                assert(strings.contains("ABC"))
+                assert(strings.contains("DEF"))
+                assert(strings.contains("GHI"))
+            }
+        }
+        ```
++ ### Map Multi Binding
+    + #### 지원하는 기본 키
+        + @StringKey
+        + @IntKey
+        + @LongKey
+        + @ClassKey
+    
+    ```kotlin
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object MyModule{
+        @Provides
+        // @IntoMap으로 Map 바인딩 할 것임을 알려줌과 동시에 foo라는 StringKey를 쓸 것임을 명시
+        @IntoMap @StringKey("foo")
+        fun provideFooValue(): Long{
+            return 100L
+        }
+
+        @Provides
+        @IntoMap @ClassKey(Bar::class)
+        fun provideBarValue(): String {
+            return "value for Bar"
+        }
+    }
+    ```
