@@ -1,6 +1,7 @@
 package com.fastcampus.practice
 
 import androidx.collection.floatObjectMapOf
+import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,3 +25,9 @@ import javax.inject.Named
 //        return Foo(id= "Foo 2")
 //    }
 //}
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class FooModule{
+    @BindsOptionalOf
+    abstract fun optionalFoo(): Foo
+}

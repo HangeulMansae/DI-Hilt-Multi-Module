@@ -751,8 +751,118 @@ class MainActivity : ComponentActivity() {
             ``` 
 
 
-    + @BindsOptionalOf를 활용한 바인딩
+    + #### @BindsOptionalOf를 활용한 바인딩
         바인딩 되어 있지 않을 가능성이 있는 의존성을 요청할 때 (= 옵셔널 바인딩)
 
+        바인딩이 되어 있다면 상관 없지만 바인딩이 되어 있는지 불확실한 경우가 있음
+
+        모듈에서 optional 하게 바인딩 해두고 Client에서도 Optional로 요청
+
+        => Foo의 Binding 여부와 관계없이 Hilt의 Compile Validation을 Pass 할 수 있음
+
+        ```kotlin
+        // 모듈 클래스 내에서 @BindsOptionalOf를 추가, Binds와 마찬가지라 abstract임
+        @Module
+        @InstallIn(SingletonComponent::class)
+        abstract class FooModule{
+            @BindsOptionalOf
+            abstract fun optionalFoo(): Foo
+        }
+
+        ----다른 영역----
+        // 생성자 주입 방법
+        @AndroidEntryPoint
+        class MainActivity: ComponentActivity(){
+            @Inject
+            lateinit var optionalFoo: Optional<Foo>
+        }
+
+        class Bar @Inject constructor(
+            optionalFoo: Optional<Foo>
+        )
+
+        or
+
+        // Provides 주입 방법
+        @Provides
+        fun provideString(
+            optionalFoo: Optional<Foo>
+        ):String{
+            // ...
+        }
+
+        // => 이렇게만 하면 Foo를 Binding으로 추가한 것은 없어서 Optional은 Binding되지만, Foo자체는 Binding되지 않음
+        // => Foo 자체를 Binding 하는 코드도 작성해야 함
+
+        object AppModule{
+            @Provides
+            fun provideFoo(): Foo{
+                return Foo()
+            }
+        }
+        ```
+
+        + ##### Optional<T> 주요 메서드
+            + ###### isPresent()
+
+                Binding 된 경우 true를 반환
+
+            + ###### get()
+
+                바인딩 된 의존성 T를 반환함
+
+                바인딩 되지 않은 경우 예외를 던짐
+
+                orElse 류의 메서드 호출로 안전하게 접근할 수도 있음
+        + ##### @BindsOptionalOf 제약 조건
+            + @BindsOptionalOf는 반드시 모듈 내의 abstract 메서드에 추가해야 함
+            + @BindsOptionalOf 메서드는 void 타입을 반환하면 안됨 (=반환 타입이 반드시 있어야 함)
+            + **@BindsOptionalOf 메서드는 파라미터를 가질 수 없음** 
+            
+                Optional Binding은 지금 당장 어떤 의존성을 Binding 하겠다는 의도를 가지고 있는 것이 아님
+            + 생성자 바인딩 된 의존성은 항상 present 상태이므로, 이 경우 해당 의존성은 Optional Binding이 불가함
+
+                => 생성자 바인딩 해서는 안됨
+            + Optional<Provider<T>>, Optional<Lazy<T>>, Optional<Provider<Lazy<T>>> 형태로도 주입 가능
         
-    + @BindsInstance를 활용한 바인딩
+    + ##### @BindsInstance를 활용한 바인딩
+        **컴포넌트 생성과 동시에 바인딩**
+
+        외부에서 생성된 의존성을 DI Graph에 바인딩하는 방법
+
+        대거 사용자들은 직접 Component 설계 및 Instance를 생성해서 컴포넌트 생성 초기에 외부에서 생성된 Instance가 있다면 해당 Instance를 바로 Binding
+
+        ```kotlin
+        // @BindsInstance 예시
+        @DefineComponent.Builder
+        interface MyComponentBuilder{
+            MyComponentBuilder setFoo(@BindsInstance Foo foo);
+        }
+        ```
+
+
+## Multi Binding
+여러 의존성을 하나의 컬렉션으로 관리
+
+Collection 자체를 컴포넌트에 바인딩하는 기법
+
+Hilt가 지원하는 Multi Binding의 Collection Type은 Set, Map 두가지
+
++ ### Set Multi Binding
+    동일한 Type의 의존성들을 Set 형태로 관리하는 것
+
+    + #### @IntoSet을 추가해서 사용
+        ```kotlin
+        // IntoSet을 쓰면 Compile 타임에 Component에 Set을 만들고, 그 Set에 Generic 타입인 의존성을 추가할 수 있는 환경을 만들어줌
+        // IntoSet을 쓰면서 MultiBinding 할 것이라는 의도를 명시하여, 단독 Binding이 되지 않으므로 String을 요청하게 되면 Missing Binding Error가 발생
+        @Module
+        @InstallIn(SingletonComponent::class)
+        class MyModuleA{
+            @Provides
+            @IntoSet
+            fun provideOneString(): String{
+                return "ABC"
+            }
+        }
+        ```
+    + #### @ElementsIntoSet을 추가해서 사용

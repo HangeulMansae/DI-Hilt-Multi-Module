@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.fastcampus.practice.ui.theme.HiltTheme
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -30,11 +31,11 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var car: Car
-
-    @Inject
-    lateinit var providerFoo1: Provider<Foo>
-    @Inject
-    lateinit var providerFoo2: Provider<Foo>
+// Provider 방식
+//    @Inject
+//    lateinit var providerFoo1: Provider<Foo>
+//    @Inject
+//    lateinit var providerFoo2: Provider<Foo>
     //lazy 방식
 //    lateinit var lazyFoo: Lazy<Foo>
     // 만약 Binding을 만든 적 없는 Qualifier 값으로 annotation을 쓰면 에러 남
@@ -47,10 +48,16 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var john: User
 
+    @Inject
+    lateinit var optionalFoo: Optional<Foo>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         Log.e(TAG, "onCreate: 엔진타입 = ${car.engine}", )
+        assert(optionalFoo != null)
+        Log.e(TAG, "onCreate: isPresent = ${optionalFoo.isPresent}", )
+        val foo: Foo = optionalFoo.get()
 //        val foo1 = providerFoo1.get()
 //        val foo2 = providerFoo1.get()
 //        assert(foo1 !== foo2)

@@ -20,4 +20,9 @@ object AppModule {
         Log.e(TAG, "provideMyName: 호출", )
         return MyName()
     }
+
+    @Provides
+    fun provideFoo(): Foo {
+        return Foo()
+    }
 }
