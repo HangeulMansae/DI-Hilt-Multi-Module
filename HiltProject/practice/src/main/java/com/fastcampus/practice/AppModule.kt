@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
+import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 import javax.inject.Singleton
 
@@ -39,4 +40,8 @@ object AppModule {
     fun provideMultipleString(): Set<String>{
         return listOf("DEF, GHI").toSet()
     }
+
+    @Provides
+    @IntoMap
+    fun provideS
 }

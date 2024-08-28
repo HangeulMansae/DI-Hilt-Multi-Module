@@ -918,4 +918,55 @@ Hilt가 지원하는 Multi Binding의 Collection Type은 Set, Map 두가지
             return "value for Bar"
         }
     }
+
+    ----다른 부분----
+    //멀티 바인딩 된 Map 주입
+
+    @AndroidEntryPoint
+    class MainActivity: ComponentActivity(){
+        @Inject
+        lateinit var map1:Map<String, Long>
+        @Inject
+        lateinit var map2:Map<Class<*>, String>
+
+        override fun onCreate(savedInstanceState: Bundle?){
+            super.onCreate(savedInstanceState)
+            map1["foo"].toString() // 100
+            map2[Bar::class.java] // value for Bar
+        }
+    }
     ```
+
+    + @MapKey를 이용한 Custom Key
+        ```kotlin
+        enum class MyEnum{
+            ABC,
+            DEF
+        }
+
+        // MyEnumKey라는 Custom Annotation을 생성해서 MyEnum을 받는 Custom Key 생성
+        @MapKey
+        annotation class MyEnumKey(val value: MyEnum)
+
+        ----다른 영역----
+        @Module
+        @InstallIn(SingletonComponent::class)
+        object MyModule{
+            @Provides
+            @IntoMap
+            @MyEnumKey(MyEnum.ABC)
+            fun provideABCValue(): String {
+                return "value for ABC"
+            }
+        }
+        ----다른 영역----
+        class MainActivity : ComponentnActivity(){
+            @Inject
+            lateinit var map:Map<MyEnum, String>
+
+            override fun onCreate(savedInstanceState: Bundle?){
+                super.onCreate(savedInstanceState)
+                map[MyEnum.ABC] // value for ABC
+            }
+        }
+        ```
