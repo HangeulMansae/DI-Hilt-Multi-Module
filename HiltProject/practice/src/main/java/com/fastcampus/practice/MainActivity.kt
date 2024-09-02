@@ -13,11 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.fastcampus.practice.ui.theme.HiltTheme
-import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Optional
 import javax.inject.Inject
-import javax.inject.Provider
 
 private const val TAG = "MainActivity_싸피"
 // Component에 대해서 진입점을 설정해주지 않으면 super.onCreate() 이후에 의존성을 호출해도 not initialize됨
@@ -34,6 +32,11 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var str: Set<String>
+
+//    @Inject
+//    lateinit var map:Map<Int,String>
+    @Inject
+    lateinit var map:Map<Animal,String>
 // Provider 방식
 //    @Inject
 //    lateinit var providerFoo1: Provider<Foo>
@@ -51,17 +54,20 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var john: User
 
-    @Inject
-    lateinit var optionalFoo: Optional<Foo>
+//    @Inject
+//    lateinit var optionalFoo: Optional<Foo>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val fooManager = FooManager()
+        fooManager.doSomething(this.applicationContext)
         Log.e(TAG, "onCreate: $str", )
         Log.e(TAG, "onCreate: 엔진타입 = ${car.engine}", )
-        assert(optionalFoo != null)
-        Log.e(TAG, "onCreate: isPresent = ${optionalFoo.isPresent}", )
-        val foo: Foo = optionalFoo.get()
+//        assert(optionalFoo != null)
+//        Log.e(TAG, "onCreate: isPresent = ${optionalFoo.isPresent}", )
+//        val foo: Foo = optionalFoo.get()
 //        val foo1 = providerFoo1.get()
 //        val foo2 = providerFoo1.get()
 //        assert(foo1 !== foo2)
@@ -88,7 +94,7 @@ class MainActivity : ComponentActivity() {
             HiltTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        "",
+                        map[Animal.PIG].orEmpty(),
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

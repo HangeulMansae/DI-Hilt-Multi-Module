@@ -25,9 +25,9 @@ import javax.inject.Named
 //        return Foo(id= "Foo 2")
 //    }
 //}
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class FooModule{
-    @BindsOptionalOf
-    abstract fun optionalFoo(): Foo
-}
+//@Module
+//@InstallIn(SingletonComponent::class)
+//abstract class FooModule{
+//    @BindsOptionalOf
+//    abstract fun optionalFoo(): Foo
+//}

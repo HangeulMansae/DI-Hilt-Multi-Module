@@ -11,4 +11,6 @@ import javax.inject.Singleton
 //
 //}
 
-class Foo
+class Foo @Inject constructor(){
+
+}

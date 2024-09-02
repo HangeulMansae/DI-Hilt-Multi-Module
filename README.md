@@ -937,7 +937,7 @@ Hilt가 지원하는 Multi Binding의 Collection Type은 Set, Map 두가지
     }
     ```
 
-    + @MapKey를 이용한 Custom Key
+    + #### @MapKey를 이용한 Custom Key
         ```kotlin
         enum class MyEnum{
             ABC,
@@ -970,3 +970,165 @@ Hilt가 지원하는 Multi Binding의 Collection Type은 Set, Map 두가지
             }
         }
         ```
+
++ ### @MultiBinds
+    기존의 IntoSet 등의 annotation은 꼭 의존성을 하나 이상 Binding 해야지만 생성됐음
+
+    하지만 빈(Empty())인 경우가 필요할 수 있음
+
+    그럴 때 MultiBinds Annotation을 사용할 수 있고 이를 통해 Compile 타임에 빈 Collection을 제공할 수 있음
+
+    MultiBinding된 Collection이 존재하지 않는 경우에 Client에서 멀티 바인딩을 요구하면 Compile 타임에 해당 요소를 찾을 수 없으니까 Error가 발생할 수 있음
+
+    그러나 MultiBiding을 쓴다면 에러 없이 작업할 수 있음 
+
+    ```kotlin
+    @Module
+    @InstallIn(SingletonComponent::class)
+    abstract class MyModuleA{
+        @MultiBinds
+        abstract fun fooSet(): Set<Foo>
+
+        @MultiBinds
+        abstract fun fooMap(): Map<String, Foo>
+    }
+    ```
+
+    ## State란
+    Android에서 ViewModel을 이용하는 궁극적인 이유는 상태를 유지하기 위함
+    + ### 상태와 연관된 Android 특징
+        + Activity/Fragment는 언제든지 파괴될 수 있음
+        + Activity/Fragment가 파괴 되면 UI 상태가 유실됨
+        + 새로운 데이터를 로드하는 비용이 큼
+        + Activity/Fragment는 상태를 저장/복원하는 솔루션을 제공
+        + 저장/복원 가능한 데이터의 사이즈는 한정적
+
+    => 한정적이기 때문에 문제가 있었음
+
+    => ViewModel을 사용하자
+
+    + ### ViewModel
+        비즈니스 로직 또는 UI 상태를 갖는 홀더
+
+        MVVM의 VM과 용어가 같기 때문에 구분짓고자 AAC ViewModel이라고 부르기도 함
+
+        **ViewModel 생성자를 불러서 사용하는 것은 일반 클래스를 만들어서 사용하는 것과 별반 다를 것이 없음**
+
+        => ViewModelProvider라는 컴포넌트의 도움을 받아서 진행해야 함
+
+        Kotlin에서는 delegates를 이용해서 by ViewModels()로 호출할 수 있음
+
+        하지만 ViewModel 생성시 인자를 전달하기 위해서는 Factory를 제공해야 함
+
+        + #### 매개변수가 있는 ViewModel 생성
+        ```kotlin
+        class FooViewModel(foo: Foo, handle:SavedStateHandle): ViewModel()
+
+        val viewModel: FooViewModel by viewModels(
+            factoryProducer = {
+                // ViewModelProvider.Factory 반환
+            }
+        )
+
+
+        class FooViewModelFactory(val foo: Foo): AbstractSavedStateViewModelFactory(){
+            override fun <T: ViewModel> create(
+                key: String,
+                modelClass: Class<T>,
+                handle: SavedStateHandle
+            ): T{
+                return FooViewModel(foo, handle) as T
+            }
+        }
+        ```
+        + #### ViewModel 사용 시 유의사항
+            + ViewModel 주요 목적은 구성이 변경되어도 상태를 유지하는 것
+            + 데이터를 영구 유지하려는 목적이면 로컬 디스크 또는 서버에 저장
+            + Activity Context와 같은 객체를 참조하면 메모리 누수가 발생할 수 있음 => context를 참조하지 않는 것을 권장하나, 꼭 참조해야 한다면  Application Context를 참조해야 함
+            + ViewModel은 UI에 대한 의존성이 없어야 함
+            + ViewModel을 다른 클래스, 함수에 전달하면 안됨
+    + ### Hilt ViewModel
+        ```kotlin
+        // ViewModel 클래스에 반드시 마킹되어 있어야 함 
+        @HiltViewModel
+        class FooViewModel @Inject constructor(
+            val foo: Foo,
+            val handle: SavedStateHandle,
+        ): ViewModel()
+
+        // 생성자가 필요한 ViewModel을 호출할 때도 Factory가 필요 없음
+        @AndroidEntryPoint
+        class MyActivity : AppCompatActivity(){
+            private val viewModel: FooViewModel by viewModels()
+        }
+        ```
+        
+        ViewModelComponent에서 의존성을 공유하고 싶다면 @ViewModelScoped를 사용할 수 있음
+        
+        또한 ViewModelComponent 하위에서만 의존성을 제공하고 싶다면 @InstallIn Annotation 범위를 ViewModelComponent로 설정하면 됨
+
+        ```kotlin
+        @ViewModelScoped
+        class Bar constructor @Inject(...)
+
+        @Module
+        @InstallIn(ViewModelComponent::class)
+        object FooModule{
+            @Provides
+            fun provideFoo(bar:Bar): Foo{
+                return Foo(bar)
+            }
+        }
+        ```
+
+## Entry Point
+Hilt 의존성 주입이 어려운 코드에서 바인딩 된 의존성을 참조하는 방법
+
++ ### @AndroidEntryPoint와 @EntryPoint의 차이
+    @AndroidEntryPoint Annotatino은 Activity, Fragment, Service 등 Android Componen Class에 사용된다면
+
+    @EntryPoint는 Android Component Class 뿐 아니라 다른 Class에서도 Hilt Component에 접근할 수 있는 진입점을 제공
+
++ ### @EntryPoint 사용처
+    + Hilt를 사용하지 않는 라이브러리에서 의존성 주입이 어려울 때
+    + Hilt가 지원하지 않는 Android Component에 의존성 주입이 어려울 때
+    + Dynamic Feature Module에 의존성 주입이 필요한 경우
+
+**EntryPoint는 @EntryPoint와 @InstallIn으로 구성되며, 반드시 Interface로 선언되어야 함(그렇지 않으면 Component가 확장해서 구현을 할 수가 없기 때문)** 
+
+**Interface 내에 선언되는 메서드는 반드시 정해진 포맷을 지켜서 선언되어야 함**
+
+=> 프로비전 메서드로 만들어야 함
+
++ ### 프로비전 메서드란
+    매개변수를 갖지 않으면서 반드시 반환 타입을 가지는 것
+
++ ### EntryPoint 만들기
+    ```kotlin
+    // Hilt가 Component를 생성할 때 FooEntryPoint를 확장함
+    @EntryPoint
+    // SingletonComponent에 바인딩 된 의존성만 접근 가능하게 됨
+    @InstallIn(SingletonComponent::class)
+    interface FooEntryPoint{
+        fun getFoo(): Foo
+    }
+    ```
+
++ ### EntryPoint 접근하기
+    ```kotlin
+    // EntryPoints로 접근, 첫번째 인자는 HiltComponent 또는 application을 포함한 Android class
+    // 두번째 인자는, EntryPoint Interface를 전달
+    val fooEntryPoint: FooEntryPoint = EntryPoints.get(applicatoinContext, FooEntryPoint::class.java)
+    val foo: Foo = fooEntryPoint.getFoo()
+
+    // get으로 불러올 때 첫번째 인자의 Type은 Object이기 때문에 조금 더 명확하게 하고 싶다면
+    // EntryPointAccessors를 이용해서 조금 더 Type Safe하게 EntryPoint에 접근할 수 있음
+    val fooEntryPoint = EntryPointAccessors.fromApplication(context, FooEntryPoint::class.java)
+    val foo: FOo = fooEntryPoint.getFoo()
+    ```
+
+    + #### EntryPointAccessors 메서드 종류
+        + fromApplication
+        + fromActivity
+        + fromFragment
+        + fromView
