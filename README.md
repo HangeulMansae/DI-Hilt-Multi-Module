@@ -669,7 +669,7 @@ class MainActivity : ComponentActivity() {
 + ### 종류
     + ####  @Inject를 활용한 생성자 바인딩
         ```kotlin
-        class Foo @INject constructor()
+        class Foo @Inject constructor()
         ```
     + #### @Provides를 활용한 바인딩
         Module 클래스에서 Provides Annotatino과 함께 메서드를 선언할 수 있음
@@ -1132,3 +1132,63 @@ Hilt 의존성 주입이 어려운 코드에서 바인딩 된 의존성을 참�
         + fromActivity
         + fromFragment
         + fromView
+
+## Custom Component
+
+사용자가 정의한 컴포넌트로 표준 컴포넌트 하위에 위치시킬 수 있음
+
+반드시 Singleton Component 하위에 위치해야 하며 표준 Component들 사이에 배치시킬 수 없음
+```kotlin
+// @DefineComponent 어노테이션으로 상속받을 부모 Component class를 인수로 전달
+@DefineComponent(parent = SingletonComponent::class)
+// interface로 내가 생성할 Custom Component 생성
+interface MyCustomComponent
+
+
+// DefineComponent의 Instance가 여러 곳에서 참조가 될 때 DefineComponent 내부에 Builder가 위치하게 된다면
+// 참초할 때마다 불필요하게 Builder까지 참조되면서 불필요한 코드가 생성될 수 있음
+// 될 수 있으면 분리하는게 좋음 
+// Custom Component Builder의 어노테이션
+@DefineComponent.Builder
+// Custom Component를 만들어주는 builder interface 생성
+interface MyCustomComponentBuilder{
+    // Builder를 만들 때는 엄격한 규칙을 지켜야 함
+
+    // Parameter를 반드시 하나만 가지며 반환 타입은 선택에 따라 Component Builder가 될 수 있는 setter 메서드 필요
+    fun setFoo(@BindsInstance foo: Foo): MyCustomComponentBuilder
+    // Build 메서드는 Parameter를 가질 수 없으며, 반환 타입으로 반드시 Component를 가짐
+    fun build(): MyCustomComponent
+}
+```
+
++ ### Custom Component Manager
+    ```kotlin
+    class CustomcomponentManager @Inject constructor(
+        componentBuilder: MyCustomComponentBuilder
+    ) : GeneratedComponentManager<MyCustomComponent> {
+        lateinit var component: MyCustomComponent
+
+        fun doSomething(foo: Foo){
+            // ComponentBuilder를 주입 받아서 Component 생성
+            component = componentBuilder.setFoo(foo).build()
+            val bar = EntryPoints.get(component, MyCustomEntryPoint::class.java).getBar()
+        }
+
+        // 생성한 Component를 반환하면 됨 
+        override fun generatedComponent(): MyCustomComponent = component
+    } 
+    ```
+
++ ### 단점
+    + OverHead가 추가
+    + Object Graph가 복잡해짐
+    + Component는 하나의 부모 컴포넌트만 가짐
+    + Custom Component는 표준화를 위반함
++ ### 주의사항
+    + Component의 생명주기가 명확해야 함
+    + Custom Component의 사용처가 명확하고, 범용적이어야 함
+    + Hilt Component 대신 Dagger 컴포넌트 정의로 충분한지 고려
+    + Custom Component는 직젖적이든 간접적이든 SingletonComponent의 하위에 위치해야 함
+    + Component 계층 구조상, 표준 Component들 사이에 Custom Component를 위치시킬 순 없음
+
+

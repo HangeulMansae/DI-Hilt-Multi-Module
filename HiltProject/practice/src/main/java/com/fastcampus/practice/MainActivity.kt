@@ -54,6 +54,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var john: User
 
+    @Inject
+    lateinit var myDialog: MyDialog
+
 //    @Inject
 //    lateinit var optionalFoo: Optional<Foo>
 
@@ -87,19 +90,19 @@ class MainActivity : ComponentActivity() {
         Log.e(TAG, "onCreate: #${charles.name}", )
         Log.e(TAG, "onCreate: #${john.name}", )
 
-
+        myDialog.show()
 
 //        assert(this::lazyFoo.isInitialized)
-        setContent {
-            HiltTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        map[Animal.PIG].orEmpty(),
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
+//        setContent {
+//            HiltTheme {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Greeting(
+//                        map[Animal.PIG].orEmpty(),
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
+//            }
+//        }
     }
     // 메서드 주입
 //    @Inject
