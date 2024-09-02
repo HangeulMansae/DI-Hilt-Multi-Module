@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
@@ -8,20 +8,20 @@ import com.fastcampus.hilt.AppContainer
 /**
  * @author soohwan.ok
  */
-class LoginContainer(private val appContainer: AppContainer) {
+//class LoginContainer(private val appContainer: AppContainer) {
 
-    private val userDataRepository = UserDataRepository(
-        localDataSource = appContainer.createUserLocalDataSource(),
-        remoteDataSource = appContainer.createUserRemoteDataSource()
-    )
-    fun createLoginViewModelFactory(): AbstractSavedStateViewModelFactory {
-        return object : AbstractSavedStateViewModelFactory() {
-            override fun <T : ViewModel> create(
-                key: String, modelClass: Class<T>, handle: SavedStateHandle
-            ): T {
-                return LoginViewModel(userDataRepository) as T
-            }
-        }
-    }
+//    private val userDataRepository = UserDataRepository(
+//        localDataSource = appContainer.createUserLocalDataSource(),
+//        remoteDataSource = appContainer.createUserRemoteDataSource()
+//    )
+//    fun createLoginViewModelFactory(): AbstractSavedStateViewModelFactory {
+//        return object : AbstractSavedStateViewModelFactory() {
+//            override fun <T : ViewModel> create(
+//                key: String, modelClass: Class<T>, handle: SavedStateHandle
+//            ): T {
+//                return LoginViewModel(userDataRepository) as T
+//            }
+//        }
+//    }
 
-}
+//}

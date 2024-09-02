@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

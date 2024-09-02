@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 /**
  * @author soohwan.ok

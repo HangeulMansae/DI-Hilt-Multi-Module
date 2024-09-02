@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import kr.co.fastcampus.sns.ui.theme.FastcampusSNSTheme
+import com.fastcampus.hilt.ui.theme.FastcampusSNSTheme
 
 /**
  * @author soohwan.ok

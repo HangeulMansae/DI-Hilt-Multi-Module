@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns.ui.theme
+package com.fastcampus.hilt.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

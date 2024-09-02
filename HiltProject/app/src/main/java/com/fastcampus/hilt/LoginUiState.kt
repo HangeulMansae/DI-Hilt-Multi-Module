@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 /**
  * @author soohwan.ok
@@ -6,5 +6,5 @@ package kr.co.fastcampus.sns
 data class LoginUiState(
     val id:String,
     val pw:String,
-    val userState:UserState = UserState.NONE
+    val userState: UserState = UserState.NONE
 )

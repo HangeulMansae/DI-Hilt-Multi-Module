@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns.ui.theme
+package com.fastcampus.hilt.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

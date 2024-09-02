@@ -1,17 +1,22 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * @author soohwan.ok
  */
-class LoginViewModel constructor(
+@HiltViewModel
+// 생성자 Binding으로 LoginViewModel이 ViewModelComponent의 의존성으로 추가가 되는 것과 동시에, 생성자의 인자로 받는 UserDataRepository 인자의 의존성을 가져와서 세팅해줌
+// => 이미 LoginModule에서 의존성을 삽입해 놓음
+class LoginViewModel @Inject constructor(
     private val repository: UserDataRepository,
 ):ViewModel(){
 

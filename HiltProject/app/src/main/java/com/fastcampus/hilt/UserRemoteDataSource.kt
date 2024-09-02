@@ -1,5 +1,7 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
+import com.fastcampus.hilt.LoginParam
+import com.fastcampus.hilt.LoginRetrofitService
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -8,7 +10,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
  * @author soohwan.ok
  */
 class UserRemoteDataSource constructor(
-    private val service:LoginRetrofitService
+    private val service: LoginRetrofitService
 ) {
 
     suspend fun login(id:String, pw:String):String?{

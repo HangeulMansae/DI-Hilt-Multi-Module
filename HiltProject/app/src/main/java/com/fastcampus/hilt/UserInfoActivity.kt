@@ -1,4 +1,4 @@
-package kr.co.fastcampus.sns
+package com.fastcampus.hilt
 
 import android.content.Intent
 import android.os.Bundle
@@ -21,16 +21,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kr.co.fastcampus.sns.ui.theme.FastcampusSNSTheme
+import com.fastcampus.hilt.ui.theme.FastcampusSNSTheme
+import javax.inject.Inject
 
 
 /**
  * @author soohwan.ok
  */
+@AndroidEntryPoint
 class UserInfoActivity : ComponentActivity() {
+// by lazy로 가져올 것 없음
+//    private val userLocalDataSource by lazy{ (application as App).appContainer.createUserLocalDataSource()}
 
-    private val userLocalDataSource by lazy{ (application as App).appContainer.createUserLocalDataSource()}
+    @Inject
+    lateinit var userLocalDataSource : UserLocalDataSource
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
