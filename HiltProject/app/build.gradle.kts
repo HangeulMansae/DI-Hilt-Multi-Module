@@ -52,6 +52,11 @@ android {
 }
 
 dependencies {
+
+    implementation(project(":domain"))
+    implementation(project(":presentation"))
+    implementation(project(":data"))
+
     implementation(libs.datastore)
 
     implementation(libs.retrofit)

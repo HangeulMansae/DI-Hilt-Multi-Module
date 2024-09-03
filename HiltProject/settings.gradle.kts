@@ -21,4 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Hilt"
 include(":app")
-include(":practice")
+//include(":practice")
+include(":data")
+include(":presentation")
+include(":domain")
