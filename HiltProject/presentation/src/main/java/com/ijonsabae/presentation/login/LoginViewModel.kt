@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
@@ -34,17 +35,18 @@ class LoginViewModel @Inject constructor(
         val id = state.id
         val password = state.password
         val token = loginUseCase(id, password).getOrThrow()
+        postSideEffect(LoginSideEffect.NavigateToMainActivity)
         postSideEffect(LoginSideEffect.Toast(message = "token = $token"))
         Log.e(TAG, "onLoginClick: ", )
     }
 
-    fun onIdChange(id: String) = intent{
+    fun onIdChange(id: String) = blockingIntent{
         reduce{
             state.copy(id = id)
         }
     }
 
-    fun onPasswordChange(password: String) = intent{
+    fun onPasswordChange(password: String) = blockingIntent{
         reduce {
             state.copy(password = password)
         }
@@ -60,4 +62,5 @@ data class LoginState(
 // 상태 즉 State와 관련 없는 부분
 sealed interface LoginSideEffect{
     class Toast(val message:String): LoginSideEffect
+    object NavigateToMainActivity: LoginSideEffect
 }

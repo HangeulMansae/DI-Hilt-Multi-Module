@@ -1,5 +1,6 @@
 package com.ijonsabae.presentation.login
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,11 +14,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ijonsabae.presentation.component.FCButton
 import com.ijonsabae.presentation.component.FCTextField
 import com.ijonsabae.presentation.theme.FastcampusSNSTheme
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+
+@Composable
+fun SignUpScreen(
+    viewModel: SignUpViewModel = hiltViewModel(),
+    onNavigateToLoginScreen: () -> Unit
+){
+    val state = viewModel.collectAsState().value
+    val context = LocalContext.current
+    viewModel.collectSideEffect {
+        when(it){
+            is SignUpSideEffect.Toast -> Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            is SignUpSideEffect.NavigateToLoginScreen -> onNavigateToLoginScreen()
+        }
+    }
+    SignUpScreen(
+        state.id,
+        state.username,
+        state.password,
+        state.repeatPassword,
+
+        onIdChange =viewModel::onIdChange,
+        onUsernameChange = viewModel::onUsernamechange,
+        onPassword1Change = viewModel::onPasswordChange,
+        onPassword2Change = viewModel::onRepeatPasswordChange,
+        onSignUpClick = viewModel::onSignUpClick
+    )
+}
 
 @Composable
 fun SignUpScreen(
@@ -48,7 +81,8 @@ fun SignUpScreen(
                 )
             }
             Column(
-                modifier = Modifier.padding(top = 24.dp)
+                modifier = Modifier
+                    .padding(top = 24.dp)
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp)
@@ -82,7 +116,7 @@ fun SignUpScreen(
                         .padding(top = 8.dp)
                         .fillMaxWidth(),
                     value = username,
-                    onValueChange = onIdChange
+                    onValueChange = onUsernameChange
                 )
 
                 Text(
@@ -97,6 +131,7 @@ fun SignUpScreen(
                         .padding(top = 8.dp)
                         .fillMaxWidth(),
                     value = password1,
+                    visualTransformation = PasswordVisualTransformation(),
                     onValueChange = onPassword1Change
                 )
 
@@ -112,11 +147,13 @@ fun SignUpScreen(
                         .padding(top = 8.dp)
                         .fillMaxWidth(),
                     value = password2,
+                    visualTransformation = PasswordVisualTransformation(),
                     onValueChange = onPassword2Change
                 )
 
                 FCButton(
-                    modifier = Modifier.padding(vertical = 24.dp)
+                    modifier = Modifier
+                        .padding(vertical = 24.dp)
                         .fillMaxWidth(),
                     text="Sign up",
                     onClick = onSignUpClick

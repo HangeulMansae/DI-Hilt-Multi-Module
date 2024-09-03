@@ -1,5 +1,6 @@
 package com.ijonsabae.presentation.login
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ijonsabae.presentation.MainActivity
 import com.ijonsabae.presentation.component.FCButton
 import com.ijonsabae.presentation.component.FCTextField
 import com.ijonsabae.presentation.theme.FastcampusSNSTheme
@@ -30,13 +32,23 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun LoginScreen(
-    viewModel:LoginViewModel = hiltViewModel()
+    viewModel:LoginViewModel = hiltViewModel(),
+    onNavigateToSignUpScreen: () -> Unit
 ){
     val state : LoginState = viewModel.collectAsState().value
     val context = LocalContext.current
     viewModel.collectSideEffect {
         when(it){
             is LoginSideEffect.Toast -> Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            LoginSideEffect.NavigateToMainActivity -> {
+                context.startActivity(
+                    Intent(
+                        context, MainActivity::class.java
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                )
+            }
         }
     }
 
@@ -45,7 +57,7 @@ fun LoginScreen(
         password = state.password,
         onIdChange = viewModel::onIdChange,
         onPasswordChange = viewModel::onPasswordChange,
-        onNavigateToSignUpScreen = {},
+        onNavigateToSignUpScreen = onNavigateToSignUpScreen,
         onLoginClick = viewModel::onLoginClick
     )
 }
