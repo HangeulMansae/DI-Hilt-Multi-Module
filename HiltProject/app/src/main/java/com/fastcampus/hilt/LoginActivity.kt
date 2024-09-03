@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import com.fastcampus.hilt.ui.theme.FastcampusSNSTheme
+import com.ijonsabae.presentation.theme.FastcampusSNSTheme
 
 @AndroidEntryPoint
 class LoginActivity : ComponentActivity() {

@@ -1523,3 +1523,137 @@ Android에서 경계를 구분하고 영역을 분리하는 대표적인 방법
   + 권장 앱 아키텍쳐와 클린 아키텍처의 가장 큰 차이점은 DI 방향
   + 권장 앱 아키텍처는 범용성을 갖고 클린 아키텍처는 대규모 시스템에 적합
   + 클린 아키텍처 도입을 위해 android 모듈화를 진행할 수 있음 예) :presentation, :domain, :data
+
+## MVI
+MVI는 MVVM과 완전 다른 것이 아니라 MVVM으로부터 심화된 것 
+
+순수 함수를 지향함 
+
+MVVM에서 View Model에 Model과 Intent가 존재하고, Intent에 따라 Model이 변화하는 식
++ ### 장점
+  + 상태 관리가 쉬움
+  + 단방향 데이터 흐름
+  + 스레드 안정성 보장
+  + 디버깅이 쉬움
+  + 테스트가 쉬움
++ ### 단점
+  + 배우기 어려움
+  + 보일러 플레이트 코드가 많음
+  + 파일 및 메모리 관리가 어려움
+
++ ### 순수 함수란
+    함수의 입력만이 함수의 결과에 영향을 주어야 함
++ ### Model
+    UI의 상태 (State)
++ ### View
+    UI
+
+    ex) View, Compose 등
++ ### Intent
+    의도
+
+    사용자의 액션 또는 이벤트
+
+    **Android의 Intent X**
+
++ ### 흐름
+    ![](./img/mvi.png)
+
++ ### State Reducer
+
+    Reducer(Transformer) = (State, Event) -> State
+
+    => 기존의 상태에 이벤트가 더해져 새로운 상태가 만들어짐
+    
+
+    MVI에서 Intent 호출에 따른 결과로 새로운 Model을 만들게 됨
+
+    => View에 보여줄 새로운 상태를 만들어야 함
+
+    <mark>**새로운 상태를 만드는 로직의 집합**</mark>
+
+    + MVI에서 상태는 불변해야 함
+    + 새로운 이벤트는 기존 상태와 함께 새로운 상태를 만듦
+    + 상태 관리를 한 곳에서 할 수 있음
+
++ ### MVI 예제 코드
+  ```kotlin
+  sealed class Event{
+    object Increment: Event()
+    object Decrement: Event()
+  }
+
+  // MVI에서 Model에 해당하는 부분
+  data class State(val counter: Int = 0)
+
+  // View Model은 View에 참조할 수 없음
+  class ViewModel{
+    val state = MutableStateFlow(State())
+
+    // Intent를 호출하는 Trigger 부분
+    fun handleEvent(event: Event){
+        when(event){
+            is Increment -> state.update { it.copy(counter = it.counter + 1) }
+            is Decrement -> state.update { it.copy(counter = it.counter - 1) }
+        }
+    }
+  }
+  ```
+
+
+  ```kotlin
+  class ViewModel{
+    private val events = Channel<Event>()
+    val state =  MutableStateFlow(State()) // 외부에서 상태 변경 가능
+
+    init {
+        events.receiveAsFlow().onEach(::updateSTate).launchIn(viewModelScope)
+    }
+
+    fun handleEvent(event: Event) {events.trySned(event)}
+
+    private fun updateState(event:Event){
+        when(event){
+            is Increment -> state.update {it.copy(counter = it.counter + 1)}
+            is Decrement -> state.update {it.copy(counter = it.counter - 1)}
+        }
+    }
+  }
+  ```
+
+  ```kotlin
+  class ViewModel{
+    private val events = Channel<Event>()
+    // runnigFold는 주어진 이벤트와 상태를 통해서 새로운 상태를 만들어내는 State Reducer
+    val state = events.receiveAsFlow()
+        .runningFold(State(), ::reduceState) // State Reducer
+        .stateIn(viewModelScope, Eagerly, State())
+
+    fun handleEvent(event: Event) {events.trySned(event)}
+
+    private fun reduceState(currentState:State, event:Event): State{
+        return when(event){
+            is Increment -> currentState.copy(counter = currentState.counter + 1)
+            is Decrement -> currentState.copy(counter = currentState.counter - 1)
+        }
+    }
+  }
+  ```
++ ### Side Effect
+    함수가 함수의 외부 요소 또는 상태를 변경하는 것
+
+    MVI에서는 Intent가 새로운 UI의 상태를 만들어서 View에 보여주는데 그렇게까지 할 필요가 없는 경우가 존재
+    
+    ex) 다이얼로그를 띄운다거나 등, 새로운 액티비티르 띄우거나, 토스트로 일시적인 메시지를 띄우는 것
+
+    => 실제 화면의 상태와는 크게 중요하지 않은 기능을 처리할 때
+
+    + 안드로이드에서 순수함수로만 앱을 구성하기는 어려움
+    + 사이드 이펙트는 일반적으로 Navigation, Logging, 분석, Toast 등 일회성 이벤트를 처리할 때 필요
+    + 사이트 이펙트 처리 결과는 선택적으로 UI 상태를 변경할 수 있음
+
+
+
+
+
+

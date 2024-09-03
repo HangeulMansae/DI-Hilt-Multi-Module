@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import com.fastcampus.hilt.ui.theme.FastcampusSNSTheme
+import com.ijonsabae.presentation.theme.FastcampusSNSTheme
 import javax.inject.Inject
 
 

@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -30,6 +32,8 @@ android {
 }
 
 dependencies {
+    implementation("com.google.dagger:hilt-android:2.48.1")
+    ksp("com.google.dagger:hilt-compiler:2.48.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
