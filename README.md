@@ -1209,7 +1209,7 @@ Architecture는 코드가 엉망이 되어가는 것을 방지하는 규약이�
 
     => 회계사, 판매원, 개발자 클래스로 나누어서 업무를 분담하는 것이 좋음
 
-    + ### 요약
+    + #### 요약
         + 하나의 클래스는 하나의 기능만 책임지고 수행해야 함
         + SRP 원칙을 따를 시, 하나의 책임 변경이 다른 책임의 변경으로 전파되지 않음
         + 책임을 적절히 분배함으로써 코드 가독성이 좋아지고, 유지보수하기가 쉬워짐
@@ -1226,21 +1226,300 @@ Architecture는 코드가 엉망이 되어가는 것을 방지하는 규약이�
 + ### 개방 폐쇄 원칙 - **O**pen**C**lose**P**rinciple
     기존의 코드를 변경하지 않고, 기능을 추가할 수 있도록 설계해야 함
 
-    + ### 원칙
-        + #### 확장에 열려있다
+    + #### 원칙
+        + ##### 확장에 열려있다
             모듈의 확장성을 보장
 
             변경사항이 발생해도 쉽게 확장
 
             확장이라는 것은 새로운 기능이 추가되는 것
 
-        + #### 변경에 닫혀있다
+        + ##### 변경에 닫혀있다
+            클래스를 수정하는 것을 제한
+
+            객체지향의 다형성을 활용
+
+        + ##### 요약
+            + 기존의 코드를 변경하지 않으면서 기능을 추가할 수 있어야 함
+            + 변경사항이 발생했을 때 손쉽게 코드를 추가하여 확장할 수 있음
+            + OCP는 객체 지향 프로그래밍의 추상화를 의미함
+            + abstract 또는 interface 키워드를 이용함
+            + 의존 역전 원칙(DIP)의 설계 기반이 됨
+
+
+        + ##### 원칙 위반 예제
+            ```kotlin
+            class Animal(val name: String)
             
+            // Animal 이름마다 작성해야 함
+            class AnimalSpeaker{
+                when(animal.name){
+                    "고양이" -> println("냐옹")
+                    "개" -> println("멍멍")
+                }
+            }
+            ```
+            
+            => 개선
 
+            ```kotlin
+            abstract class Animal(val name: String){
+                abstract fun speak()
+            }
 
+            // Animal을 상속 받아서 각 클래스에서 speak 생성
 
-+ ### 리스코프 치환 원칙
+            class Dog : Animal("개"){
+                override fun speak() = println("멍멍")
+            }
+            class Lion : Animal("사자"){
+                override fun speak() = println("어흥")
+            }
+            ```
 
-+ ### 인터페이스 분리 원칙
++ ### 리스코프 치환 원칙 - **L**iskov **S**ubstitution **Principle
+    자식 클래스는 부모 클래스로 대체 가능해야 함
 
+    + #### 요약
+        + 부모 클래스와 자식 클래스 사이의 행위가 일관성이 있어야 함
+        + 부모 클래스 상속 시 정의한 원칙을 그대로 따라야 함
+        + LSP는 협업 시 개발자 간의 약속을 지키는 원칙임
+        + 객체 지향 프로그래밍의 다형성을 의미함
+    
+    ```kotlin
+    abstract class Animal(val name: String){
+        abstract fun speak()
+    }
+
+    class Dog : Animal("개"){
+        override fun speak() = println("멍멍")
+    }
+
+    class Fish : Animal(){
+        // 물고기는 울음 소리가 없어어 Animal의 speak 함수를 제대로 override 하지 못하므로, 자식인 Fish가 부모 클래스를 완전히 대체하지 못함
+        // 하지만 물고기도 동물이 맞긴 함
+        // => 추상화가 잘못되었다고 할  수 있음, 지금의 Animal은 울음 소리가 있는 동물을 기반으로 한 Class에 더 부합함
+        override fun speak() = throw Exception("물고기는 울음 소리가 없어요")
+    }
+    ```
+
++ ### 인터페이스 분리 원칙 - **I**nterface **S**egregation **P**rinciple
+    목적과 용도에 적합한 Interface 만을 제공함
+
+    + #### 요약
+        + Client의 목적과 용도에 적합한 Interface만을 제공
+        + 유연하게 Class의 기능을 확장하거나 수정할 수 있음
+        + SRP는 Class의 단일 책임을 갖오하고, ISP는 Interface의 단일 책임을 강조
+        + Interface 분리는 변경사항을 예측하고 설계해야 하는데, 이는 개발자의 경험과 역량이 중요
 + ### 의존성 역전 원칙
+    세부적인 내용을 갖고 있지 않은 추상화 된 상위 수준에 의존해야 함
+
+    Caller는 Interface에 의존하고, 요청하는 시점에 구현체들이 Interface에 꽂혀서 구현됨
+
+    => 구현체에 의존하지 않아도 됨
+
+    + #### 요약
+        + 대상을 참조할 때는 추상화 된 요소(Interface, abstract class)를 참조함
+        + 추상화 된 요소를 구현한 내용이 저수준 클래스(모듈)이 됨
+        + 고수준 클래스는 변경이 적고, 저수준 모듈은 변경이 잦음
+        + 변경에 영향을 덜 받는 구조일 수록 재사용성, 확장성 및 유닛 테스트가 쉬워짐
+
+    ```kotlin
+    interface Engine
+    class GasolineEngine: Engine
+    class DieselEngine: Engine
+    class Car(val engine: Engine)
+
+    val engine = DieselEngine()
+    // val engine = GasolineEngine()
+    val car = Car(engine)
+    ```
+
+## 클린 아키텍쳐
+SW 구조를 설계할 때 지켜야 할 원칙과 방법을 정의한 개념
+
+내부로 이동할 수록 고수준 모듈로 추상화 수준이 높고, 바깥쪽으로 갈 수록 세부적인 구현 사항이 많아짐
+
+안쪽에 있는 것들이 조금 더 높은 수준의 범용성을 가지게 됨
+
++ ### 요약
+    + 클린 아키텍처에서 의존성 방향은 반드시 바깥쪽에서 안쪽으로 향해야 함
+    + 동심원 안쪽으로 갈 수록 추상화 레벨이 높아짐 (고수준)
+    + 계층을 횡단할 때는 의존성 역전 원칙을 기억하자
+
++ ### 고수준, 저수준 모듈
+    + #### 저수준 모듈
+        + 상세한 기능 구현
+        + **변경이 잦을만한 요소의 집합**
+
+        예) 문자열을 암호화한 뒤, 로컬 및 원격 데이터베이스에 저장함
+    
+    + #### 고수준 모듈
+        + **핵심적인 비즈니스 로직**
+        + 추상적으로 서술
+
+        예) 문자열을 저장
+
++ ### 의존성 규칙
+    의존성은 반드시 바깥에서 안쪽으로
+
+    내부에서는 외부를 알 수 없어야 함
+
+    외부의 것은 내부를 의존하기 때문에 알 수 있음
+
+    **단 외부의 것으로 인해 내부를 변경시켜서는 안됨**
+
+    ex) Entity에서는 UseCases 등 외부를 알 수 없어야 함 && UI 영역으로 인해 Entity가 변경되어서는 안됨 (메서드 파라미터가 변경된다던지 등)
+    ![](./img/CleanArchitecture.jpg)
+
++ ### 계층
+    + #### Entity
+        핵심적인 내용, 규칙, 행동, 로직 등을 캡슐화
+
+        가장 핵심적이며 고수준임
+
+        변경되지 않을만한 것들이 들어가야 함
+
+        어떤 메서드를 갖는 객체일 수도 있고, 데이터 모델일 수도 있고, 함수의 집합일 수도 있음
+
+        **가장 변하지 않을만한 것이라는 것이 핵심**
+
+    + #### UseCase
+        Application이 갖는 기능, Function, Business Logic 등을 SRP를 준수하고 캡슐화 하면서 구현하는 계층
+
+        의존성 규칙에 따라서 UseCase 변경사항이 Entity에 영향을 주어선 안되며, DB나 UI, FrameWork등이 UseCase에 영향을 주어선 안됨
+
+        SRP를 준수해서 하나의 기능만 수행하도록 하는 것이 일반적
+        ex)App 내에서 사용자 목록을 가져오는 기능이 있다면 이를 캡슐화한 getUserList와 같은 UseCase 클래스를 만들 수 있을 것 하지만 구현 기능 없이 추상적으로 보통 구현함
+
+        보통 get~UseCaseInterface or abstract Class로 만드는 것이 일반적
+
+        단일 기능을 가지는 추상적인 Interface나 Class들이 포함됨
+
+    + #### Interface Adapter
+        일반적으론 UseCase에 선언된 추상화된 Interface나 abstract Class에 대한 상세한 구현을 Interface Adapter에서 함
+
+        기본적으로 Clean Architecture는 각자의 계층에서 사용하기 가장 편리한 타입, 소위 우리가 말하는 Model이라는 것을 직접 따로따로 선언해서 사용
+
+        UseCase의 계층에 선언된 내용을 상속 받아서 구현하게 되더라도 결국 UseCase를 호출하는 Parameter Type Return Type이 일반적으로 Entity 계층에 선언된 Model Type이기 때문에 어디서 가져왔더라도, Type에 맞춰서 넘겨줘야 함 => Entity 계층에 있는 Model로 변환을 해야 함
+
+        즉 Intferface Adapter의 역할은 동심원 계층을 넘나들 때 그 계층이 가장 이해하기 쉬운 Type으로 변환하는 것이며 UseCase와 Entity, DB, UI에서의 Data 변환을 하게 되는 역할
+
+        예를 들어 DB에 있는 Data를 UI에 표현하게 될 때 계층을 넘나들게 될텐데, 넘나들때마다 형변환을 해주어야 하고 이 역할을 Interface Adapter가 하게 됨
+
+    + #### FrameWork 및 Driver
+        Android에서는 Android FrameWork 및 Library를 포함한 모든 세부적인 내용
+
+
++ ### 계층을 횡단하기 - 제어 흐름
+    바깥쪽에서는 안쪽을 알지만 안쪽에서는 바깥쪽을 모르기에 만약 서로 Communication이 필요하다면
+
+    Interface로 의존성 역전을 시켜서 원하는 데이터나 이벤트를 안쪽으로 전달 가능
+
++ ### Google이 권장하는 App Architecture
+  + #### UI Layer
+    화면에 데이터를 표시하는 것
+  + #### Domain Layer
+    Business Logic을 캡슐화 하는 것
+  + #### Data Layer
+    네트워크나 로컬에서 데이터를 불러오는 것
+
+  + #### Sequence 
+
+    ```mermaid
+    flowchart TB
+    a(UI Layer) --> b(Domain Layer) --> C(Data Layer)
+    ```
+
+  + #### 요약
+    + 두 아키텍쳐 모두 계층적인 구조를 갖고 있음(= 관심사 분리)
+    + 앱 아키첵쳐에서는 UI가 Data를 의존하고, Clean 아키텍쳐에서는 의존 관계를 가지지 않음
+    + Android 권장 App 아키텍쳐가 직관적이며 이해 쉬움
+    + 클린 아키텍쳐는 대규모 시스템에 더 적합함
+  + #### 클린 아키텍쳐와의 차이점
+    **계층 간 의존성 방향**
+
+    앱 아키텍쳐는 UI가 Data를 의존함
+
+    하지만 Clean Architecture에서는 UI와 Data는 같은 레이어이고, 의존성은 안으로만 향함
+
+    + ##### 이유
+      + ###### 범용성
+        각 서비스나 프로젝트, 부서별로 요구사항이 다를 수 있기 때문에, 그에 맞게 설계하는 것이 중요함
+
+        여러 서비스에 맞으면서, 단점 없고 은총알 같은 완벽한 아키텍쳐는 존재하지 않음
+
+        Google은 모든 Android 개발자를 상대로 알맞은 Architecture 설명을 하기 어려움
+
+        => 범용적으로 아우를 수 있는 가이드를 제시해야 함 => 이해 쉽고 적용도 쉬운 아키텍쳐
+
+
+      + ###### Clean Architecture를 배워야 하는 이유
+        의존성 규칙 때문
+
+        앱 아키텍쳐는 Data Layer에 의해 Domain과 UI 계층도 영향을 받음
+
+        하지만 Clean Architecture는 UI와 Data가 완전히 분리되어 있음
+
+        => 협업에 유리 및 외부 변화로부터 Entity나 Usecase가 변경되지 않는 강건한 구조를 가짐
+
+        => 확장성, 유닛 테스트 및 용의성, 빌드 시간 단축 등 여러 면에서 구글의 앱 아키텍쳐보다 우위를 가지고 있음
+
+        반드시 적용해야 하는 것은 아님
+
+    + #### 시나리오
+        ![](./img/시나리오.png)
+
+        + ##### View
+            View가 ViewModel에 의존적임
+
+            ViewModel이 가지고 있는 Data 목록을 Observing 하고 있다가 Data 변경이 발생하면 View를 갱신함
+        + ##### ViewModel
+            Data를 불러오고 갱신하기 위해서 UseCase를 호출
+        + ##### UseCase
+            Repository를 거쳐서 DataSource로부터 Data를 가져와서 반환
+        + ##### Repository<Interface>
+            UI와 Data간 의존 관계가 없어 Communication이 어려우므로
+        + ##### Repository
+        + ##### LocalDateSource
+        + ##### RemoteDataSource
+        + ##### Entity
+             
+
+
++ ### 관심사 분리
+    계층을 나누는 것을 SW 관점에서 관심사 분리라고 함
+
+    코드의 변경사항이 생겼을 때 관심있는 부분만 보면 되고, 변경 사항의 전파를 막음(UI의 변경사항이 Data에도 영향을 끼친다던가)
+
+## 모듈화
+Android에서 경계를 구분하고 영역을 분리하는 대표적인 방법
+![](./img/MultiModule.png)
+
++ ### Presenter
+    UI에 연관된 로직, 클래스
+    ex)View, Composable, ViewModel
+
++ ### Domain
+    UseCase, Entity
+
+    **Android 의존성이 없는 범용적인 핵심적인 로직만 모여야 함**
+
+    => Kotlin Library로 만드는 것을 권장
++ ### Data
+    Room, Preference 등 Data와 연관된 클래스
+
+
++ ### 의존성
+  ![](./img/Dependency.png)
+
+    Presentation과 Data가 Domain에 의존하는 형태
+
+    이로 인해 독립적으로 테스트하는게 가능해짐
+
+    => 앱 아키텍쳐의 경우는 UI 테스트를 위해 Domain과 Data까지 모든 모듈을 포함해서 빌드 해야 하지만 클린 아키텍쳐에서는 선택적으로 빌드를 할 수 있음
+
++ ### 요약
+  + 권장 앱 아키텍쳐와 클린 아키텍처의 가장 큰 차이점은 DI 방향
+  + 권장 앱 아키텍처는 범용성을 갖고 클린 아키텍처는 대규모 시스템에 적합
+  + 클린 아키텍처 도입을 위해 android 모듈화를 진행할 수 있음 예) :presentation, :domain, :data
