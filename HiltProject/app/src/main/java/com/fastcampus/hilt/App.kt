@@ -1,7 +1,6 @@
 package com.fastcampus.hilt
 
 import android.app.Application
-import com.fastcampus.hilt.AppContainer
 import dagger.hilt.android.HiltAndroidApp
 
 /**

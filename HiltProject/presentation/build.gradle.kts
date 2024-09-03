@@ -40,6 +40,10 @@ android {
 }
 
 dependencies {
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
     implementation("com.google.dagger:hilt-android:2.48.1")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -62,6 +66,14 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
+    // orbit
+    implementation("org.orbit-mvi:orbit-core:6.1.0")
+// or, if on Android:
+    implementation("org.orbit-mvi:orbit-viewmodel:6.1.0")
+// If using Jetpack Compose include
+    implementation("org.orbit-mvi:orbit-compose:6.1.0")
 
     implementation(project(":domain"))
 }

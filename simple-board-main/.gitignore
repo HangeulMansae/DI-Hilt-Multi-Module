@@ -1,0 +1,5 @@
+*/.gradle
+*/.idea
+*/build/**
+board/out/**
+board/upload-file/**
