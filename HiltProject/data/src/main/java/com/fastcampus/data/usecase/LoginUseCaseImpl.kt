@@ -2,7 +2,7 @@ package com.fastcampus.data.usecase
 
 import com.fastcampus.data.model.LoginParam
 import com.fastcampus.data.retrofit.UserService
-import com.ijonsabae.domain.usecase.login.LoginUseCase
+import com.fastcampus.domain.usecase.login.LoginUseCase
 import javax.inject.Inject
 
 class LoginUseCaseImpl @Inject constructor(

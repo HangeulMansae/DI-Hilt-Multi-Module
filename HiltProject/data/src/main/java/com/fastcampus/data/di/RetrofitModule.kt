@@ -11,7 +11,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
-val FC_HOST = "http://192.168.56.1:8080"
+val FC_HOST = "http://192.168.100.138:8080"
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -2,7 +2,7 @@ package com.fastcampus.data.usecase
 
 import com.fastcampus.data.model.SignUpParam
 import com.fastcampus.data.retrofit.UserService
-import com.ijonsabae.domain.usecase.login.SignUpUseCase
+import com.fastcampus.domain.usecase.login.SignUpUseCase
 import javax.inject.Inject
 
 class SignUpUseCaseImpl @Inject constructor(

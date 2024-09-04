@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ijonsabae.presentation"
+    namespace = "com.fastcampus.presentation"
     compileSdk = 34
 
     defaultConfig {

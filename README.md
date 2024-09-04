@@ -1654,6 +1654,8 @@ MVVM에서 View Model에 Model과 Intent가 존재하고, Intent에 따라 Model
 
 
 
-
-
-
+## Kotlin
++ ### operator 키워드
+  연산자를 오버로딩 할 수 있게 해주는 것
++ ### Sealed class
++ ### Enum class 
