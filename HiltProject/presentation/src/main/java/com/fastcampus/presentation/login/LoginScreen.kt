@@ -25,7 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.fastcampus.presentation.MainActivity
 import com.fastcampus.presentation.component.FCButton
 import com.fastcampus.presentation.component.FCTextField
-import com.fastcampus.presentation.theme.FastcampusSNSTheme
+import com.fastcampus.presentation.theme.ConnectedTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -150,7 +150,7 @@ private fun LoginScreen(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LoginScreenPreview() {
-    FastcampusSNSTheme {
+    ConnectedTheme {
         LoginScreen(
             id = "",
             password = "",

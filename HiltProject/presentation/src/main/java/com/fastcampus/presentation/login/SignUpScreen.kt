@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fastcampus.presentation.component.FCButton
 import com.fastcampus.presentation.component.FCTextField
-import com.fastcampus.presentation.theme.FastcampusSNSTheme
+import com.fastcampus.presentation.theme.ConnectedTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -166,7 +166,7 @@ fun SignUpScreen(
 @Preview
 @Composable
 private fun SignUpScreenPreview() {
-    FastcampusSNSTheme {
+    ConnectedTheme {
         SignUpScreen(id = "test", username = "Charles", password1 = "test1234", password2 = "test1234", onIdChange = {}, onUsernameChange = {}, onPassword1Change = {}, onPassword2Change = {}, onSignUpClick = {})
     }
 }
