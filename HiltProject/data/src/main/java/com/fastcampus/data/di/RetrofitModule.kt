@@ -1,5 +1,6 @@
 package com.fastcampus.data.di
 
+import com.fastcampus.data.retrofit.FCInterceptor
 import com.fastcampus.data.retrofit.UserService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -11,15 +12,16 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
-val FC_HOST = "http://192.168.100.138:8080"
+val FC_HOST = "http://192.168.56.1:8080"
 
 @Module
 @InstallIn(SingletonComponent::class)
 class RetrofitModule {
     @Provides
-    fun provideOkHttpClient() : OkHttpClient{
+    fun provideOkHttpClient(fcInterceptor: FCInterceptor) : OkHttpClient{
         return OkHttpClient
             .Builder()
+            .addInterceptor(fcInterceptor)
             .build()
     }
 
