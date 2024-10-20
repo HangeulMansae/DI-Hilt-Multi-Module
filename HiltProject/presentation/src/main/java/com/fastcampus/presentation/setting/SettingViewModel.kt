@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import com.fastcampus.domain.usecase.login.ClearTokenUseCase
 import com.fastcampus.domain.usecase.main.setting.GetMyUserUseCase
+import com.fastcampus.domain.usecase.main.setting.UpdateMyNameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -18,6 +19,7 @@ import javax.inject.Inject
 class SettingViewModel @Inject constructor(
     private val clearTokenUseCase: ClearTokenUseCase,
     private val getMyUserUseCase: GetMyUserUseCase,
+    private val updateMyNameUseCase: UpdateMyNameUseCase
 ) : ViewModel(), ContainerHost<SettingState, SettingSideEffect>{
     override val container: Container<SettingState, SettingSideEffect> =
         container(
@@ -46,6 +48,11 @@ class SettingViewModel @Inject constructor(
     fun onLogoutClick() = intent{
         clearTokenUseCase().getOrThrow()
         postSideEffect(SettingSideEffect.NavigateToLoginActivity)
+    }
+
+    fun onUsernameChange(username: String) = intent{
+        updateMyNameUseCase(username = username).getOrThrow()
+        load()
     }
 }
 
