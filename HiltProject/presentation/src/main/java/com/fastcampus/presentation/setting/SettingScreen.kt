@@ -2,6 +2,9 @@ package com.fastcampus.presentation.setting
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,10 +61,18 @@ fun SettingScreen(viewModel: SettingViewModel = hiltViewModel()) {
             }
         }
     }
+    val visualMediaPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = viewModel::onImageChange
+    )
     SettingScreen(
         username = state.username,
         profileImageUrl = state.profileImageUrl,
-        onImageChangeClick = {},
+        onImageChangeClick = {visualMediaPickerLauncher.launch(
+            PickVisualMediaRequest(
+                ActivityResultContracts.PickVisualMedia.ImageOnly
+            )
+        )},
         onNameChangeClick = {usernameDialogVisible = true},
         onLogoutClick = viewModel::onLogoutClick
     )
@@ -96,7 +107,7 @@ private fun SettingScreen(
 
             IconButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                onClick = { onImageChangeClick }) {
+                onClick = { onImageChangeClick() }) {
                 Box(
                     modifier = Modifier
                         .size(30.dp)

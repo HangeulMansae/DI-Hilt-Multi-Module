@@ -1,7 +1,8 @@
 package com.fastcampus.domain.usecase.main.setting
 
-interface UpdateMyNameUseCase {
+interface SetMyUserUseCase {
     suspend operator fun invoke(
-        username: String
+        username: String? = null,
+        profileImageUrl: String? = null
     ):Result<Unit>
 }

@@ -1,10 +1,12 @@
 package com.fastcampus.presentation.setting
 
+import android.net.Uri
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import com.fastcampus.domain.usecase.login.ClearTokenUseCase
 import com.fastcampus.domain.usecase.main.setting.GetMyUserUseCase
-import com.fastcampus.domain.usecase.main.setting.UpdateMyNameUseCase
+import com.fastcampus.domain.usecase.main.setting.SetProfileImageUseCase
+import com.fastcampus.domain.usecase.main.setting.SetMyUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import org.orbitmvi.orbit.Container
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class SettingViewModel @Inject constructor(
     private val clearTokenUseCase: ClearTokenUseCase,
     private val getMyUserUseCase: GetMyUserUseCase,
-    private val updateMyNameUseCase: UpdateMyNameUseCase
+    private val SetMyUserUseCase: SetMyUserUseCase,
+    private val setProfileImageUseCase: SetProfileImageUseCase
 ) : ViewModel(), ContainerHost<SettingState, SettingSideEffect>{
     override val container: Container<SettingState, SettingSideEffect> =
         container(
@@ -51,7 +54,14 @@ class SettingViewModel @Inject constructor(
     }
 
     fun onUsernameChange(username: String) = intent{
-        updateMyNameUseCase(username = username).getOrThrow()
+        SetMyUserUseCase(username = username,).getOrThrow()
+        load()
+    }
+
+    fun onImageChange(contentUri: Uri?) = intent {
+        setProfileImageUseCase(
+            contentUri = contentUri.toString()
+        ).getOrThrow()
         load()
     }
 }
