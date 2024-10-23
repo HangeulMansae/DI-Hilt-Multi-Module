@@ -1,7 +1,10 @@
 package com.fastcampus.presentation.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,6 +27,7 @@ fun MainNavHost() {
     val navController = rememberNavController()
     Surface {
         Scaffold(
+            modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
             topBar = {
                 TopAppBar(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background),

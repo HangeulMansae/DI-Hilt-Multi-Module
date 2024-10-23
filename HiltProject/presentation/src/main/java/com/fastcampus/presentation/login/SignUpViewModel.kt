@@ -19,7 +19,10 @@ private const val TAG = "LoginViewModel_싸피"
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val signUpUseCase: SignUpUseCase
-) : ViewModel(), ContainerHost<SignUpState, SignUpSideEffect> {
+) : ViewModel(),
+    // MVI로 상태를 관리하기 위한 State와 SideEffect를 관리하기 위한 Interface를 가지는 ContainerHost를 생성
+    ContainerHost<SignUpState, SignUpSideEffect> {
+        // 초기 상태와 exceptionHandler 등에 대해서 설정 및 관리하는 Container override
     override val container: Container<SignUpState, SignUpSideEffect> = container(
         initialState = SignUpState(),
         buildSettings = {
@@ -30,7 +33,7 @@ class SignUpViewModel @Inject constructor(
             }
         }
     )
-
+    // SideEffect나 상태 변화(Reduce)를 하기 위해 Orbit의 intent 블럭을 열어서 비동기적으로 돌아가는 내부 로직을 작성
     fun onSignUpClick() = intent{
         val id = state.id
         val username = state.username
@@ -40,6 +43,7 @@ class SignUpViewModel @Inject constructor(
         if(password == repeatPassword){
             val isSuccessful = signUpUseCase(id, username, password).getOrThrow()
             if(isSuccessful){
+                // 현재 UI에는 옇향이 없는 SideEffect 생성
                 postSideEffect(SignUpSideEffect.Toast("회원가입에 성공했습니다"))
                 postSideEffect(SignUpSideEffect.NavigateToLoginScreen)
             }
@@ -50,6 +54,7 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
+    // reduce로 상태 변화를 시켜야 하지만, 비동기적이 아니라 동기적으로 돌리고 싶을 때는 blockingIntent 코드 내에 작성
     fun onIdChange(id: String) = blockingIntent{
         reduce{
             state.copy(id = id)
@@ -74,6 +79,7 @@ class SignUpViewModel @Inject constructor(
     }
 }
 
+// MVI에서 ContainerHost가 관리하게 할 State를 정의한 DataClass
 @Immutable
 data class SignUpState(
     val id: String = "",
@@ -82,6 +88,7 @@ data class SignUpState(
     val repeatPassword: String = ""
 )
 
+// 싱태와 관련 없는 SideEffect들을 나열한 sealed Interface
 // 상태 즉 State와 관련 없는 부분
 sealed interface SignUpSideEffect{
     class Toast(val message:String): SignUpSideEffect
