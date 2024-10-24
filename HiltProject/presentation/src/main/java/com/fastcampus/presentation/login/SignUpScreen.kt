@@ -30,8 +30,10 @@ fun SignUpScreen(
     viewModel: SignUpViewModel = hiltViewModel(),
     onNavigateToLoginScreen: () -> Unit
 ){
+    // signUpViewModel에서 관리하는 State를 flow로 수집, 이게 바뀔 때마다 Recomposition이 될 거임
     val state = viewModel.collectAsState().value
     val context = LocalContext.current
+    // 발행된 SideEffect를 collect 하면서 들어온 sideEffect의 종류에 따라서 로직 처리
     viewModel.collectSideEffect {
         when(it){
             is SignUpSideEffect.Toast -> Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
